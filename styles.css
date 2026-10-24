@@ -264,3 +264,16 @@ main { max-width: 1200px; margin: 0 auto; padding: 28px 16px 96px; }
   .print, .print .stamp { animation: none; }
   .rail-fill, .tube .lit { transition: none; }
 }
+
+.pet-heart {
+  position: absolute;
+  width: 14px;
+  height: 12px;
+  pointer-events: none;
+  background: var(--copper-soft);
+  animation: heartFloat 1s ease-out forwards;
+}
+@keyframes heartFloat {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-40px); }
+}

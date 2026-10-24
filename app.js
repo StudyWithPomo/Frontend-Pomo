@@ -634,9 +634,19 @@
     if (action === 'finish') { while (s.left > 1) { s.secs[s.total - s.left] = s.drift ? s.drift.kind : 'focus'; if (!s.drift) { s.focusedSec++; s.xpSec += multiplier(); } s.left--; } tick(); }
   }
 
-  
+
+  function spawnHeart(porthole){
+    const h = document.createElement('span');
+    h.className = 'pet-heart';
+    h.style.left = (30 + Math.random() * 40) + '%';
+    h.style.top = '30%';
+    porthole.appendChild(h);
+    h.addEventListener('animationend', () => h.remove());
+  }
+
   function wirePetting(porthole) {
     let dist = 0;
+    let nextHeartAt = 150;
 
     porthole.addEventListener('pointermove', (e) => {
       dist += Math.abs(e.movementX) + Math.abs(e.movementY);
@@ -645,11 +655,16 @@
         S.isPetting = true;
         drawPets();
       }
+      if (!(S.session && S.session.mode === 'focus') && (dist >= nextHeartAt)){
+        spawnHeart(porthole);
+        nextHeartAt += 150;
+      }
     });
 
     porthole.addEventListener('pointerleave', () => {
       // ⑤ reset the counter
       dist = 0;
+      nextHeartAt = 150;
       S.isPetting = false;
       drawPets();
     });
