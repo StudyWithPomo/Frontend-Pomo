@@ -636,6 +636,18 @@
 
 const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rendering="crispEdges" aria-hidden="true"><g fill="currentColor"><rect x="1" y="0" width="2" height="1"/><rect x="4" y="0" width="2" height="1"/><rect x="0" y="1" width="7" height="2"/><rect x="1" y="3" width="5" height="1"/><rect x="2" y="4" width="3" height="1"/><rect x="3" y="5" width="1" height="1"/></g></svg>';
 
+  function showBubble(porthole, show){
+    let b = porthole.querySelector('.pet-bubble');
+    if (!b){
+      b = document.createElement('span');
+      b.className = 'pet-bubble';
+      b.textContent = "Not now, we're working.";
+
+      porthole.appendChild(b);
+    }
+    b.hidden = !show;
+  }
+
   function spawnHeart(porthole){
     const h = document.createElement('span');
     h.innerHTML = HEART_SVG;
@@ -660,6 +672,11 @@ const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rende
         S.isPetting = true;
         drawPets();
       }
+
+      if (S.session.mode === 'focus' && S.isPetting){
+        showBubble(porthole, true);
+      }
+
       if (!(S.session && S.session.mode === 'focus') && (dist >= nextHeartAt)){
         spawnHeart(porthole);
         nextHeartAt += 150;
@@ -673,6 +690,7 @@ const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rende
         nextHeartAt = 150;
         S.isPetting = false;
         drawPets();
+        showBubble(porthole, false);
       }, 600);
     });
   }
