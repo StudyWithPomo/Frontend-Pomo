@@ -114,6 +114,9 @@
     return { body: S.settings.body, face: S.settings.face, color: S.settings.color, level: S.progress.level, mood };
   }
   function drawPets() {
+    if (S.lastCard) {
+      StudyPet.drawPet($('petCard'), petOpts(S.isPetting ? 'love' : S.lastCard.mood));
+    }
     StudyPet.drawPet($('petSetup'), petOpts(currentMood()));
     StudyPet.drawPet($('petLive'), petOpts(currentMood()));
   }
@@ -452,8 +455,9 @@
       (c.penalty ? ', and ' + c.penalty + ' XP lost.' : ', ' + c.earned + ' XP' + (c.mult > 1 ? ' with your study circle' : '') + '.') +
       (worst ? ' ' + (worst.kind === 'idle' ? 'Going idle' : worst.label) + ' cost you the most.' : '');
 
-    StudyPet.drawPet($('petCard'), petOpts(c.pct >= 60 ? 'love' : c.pct >= PENALTY_BELOW ? 'happy' : 'annoyed'));
-    $('petVerdict').textContent = c.leveled ? petName() + ' reached Level ' + S.progress.level + '!' + (S.progress.level === 5 ? ' Goggles unlocked.' : S.progress.level === 10 ? ' Bow tie unlocked.' : S.progress.level === 15 ? ' Top hat unlocked.' : '') :
+      c.mood = c.pct >= 60 ? 'love' : c.pct >= PENALTY_BELOW ? 'happy' : 'annoyed';
+      StudyPet.drawPet($('petCard'), petOpts(c.mood));
+      $('petVerdict').textContent = c.leveled ? petName() + ' reached Level ' + S.progress.level + '!' + (S.progress.level === 5 ? ' Goggles unlocked.' : S.progress.level === 10 ? ' Bow tie unlocked.' : S.progress.level === 15 ? ' Top hat unlocked.' : '') :
       c.pct >= 80 ? petName() + ' is most proud.' : c.pct >= PENALTY_BELOW ? petName() + ' is content.' : petName() + ' is disappointed, but you keep your level.';
     $('cardLevel').textContent = 'Lv ' + S.progress.level;
     $('cardXp').textContent = S.progress.xp + ' / ' + XP_PER_LEVEL + ' XP';
