@@ -634,9 +634,12 @@
     if (action === 'finish') { while (s.left > 1) { s.secs[s.total - s.left] = s.drift ? s.drift.kind : 'focus'; if (!s.drift) { s.focusedSec++; s.xpSec += multiplier(); } s.left--; } tick(); }
   }
 
+const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rendering="crispEdges" aria-hidden="true"><g fill="currentColor"><rect x="1" y="0" width="2" height="1"/><rect x="4" y="0" width="2" height="1"/><rect x="0" y="1" width="7" height="2"/><rect x="1" y="3" width="5" height="1"/><rect x="2" y="4" width="3" height="1"/><rect x="3" y="5" width="1" height="1"/></g></svg>';
 
   function spawnHeart(porthole){
     const h = document.createElement('span');
+    h.innerHTML = HEART_SVG;
+    h.className = 'pet-heart';
     h.className = 'pet-heart';
     h.style.left = (30 + Math.random() * 40) + '%';
     h.style.top = '30%';

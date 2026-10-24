@@ -267,10 +267,10 @@ main { max-width: 1200px; margin: 0 auto; padding: 28px 16px 96px; }
 
 .pet-heart {
   position: absolute;
-  width: 14px;
-  height: 12px;
+  width: 21px;
+  height: 18px;
   pointer-events: none;
-  background: var(--copper-soft);
+  color: var(--copper-soft);
   animation: heartFloat 1s ease-out forwards;
 }
 @keyframes heartFloat {
