@@ -634,14 +634,24 @@
     if (action === 'finish') { while (s.left > 1) { s.secs[s.total - s.left] = s.drift ? s.drift.kind : 'focus'; if (!s.drift) { s.focusedSec++; s.xpSec += multiplier(); } s.left--; } tick(); }
   }
 
-  function wirePetting(porthole){
-    porthole.addEventListener('pointerenter', () => {
-      S.isPetting = true
-      drawPets()
+  
+  function wirePetting(porthole) {
+    let dist = 0;
+
+    porthole.addEventListener('pointermove', (e) => {
+      dist += Math.abs(e.movementX) + Math.abs(e.movementY);
+
+      if (dist >= 150 && !S.isPetting) {
+        S.isPetting = true;
+        drawPets();
+      }
     });
+
     porthole.addEventListener('pointerleave', () => {
-      S.isPetting = false
-      drawPets()
+      // ⑤ reset the counter
+      dist = 0;
+      S.isPetting = false;
+      drawPets();
     });
   }
 
