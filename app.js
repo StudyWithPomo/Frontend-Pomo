@@ -34,7 +34,8 @@
     device: { connected: false, port: null, writer: null },
     peekUntil: 0,
     speed: 1,
-    idleDetector: null
+    idleDetector: null,
+    isPetting: false
   };
   const breakRange = (study) => [Math.ceil(study / 5), Math.floor(study / 3)];
   const two = (n) => String(n).padStart(2, '0');
@@ -113,7 +114,7 @@
     return { body: S.settings.body, face: S.settings.face, color: S.settings.color, level: S.progress.level, mood };
   }
   function drawPets() {
-    StudyPet.drawPet($('petSetup'), petOpts('happy'));
+    StudyPet.drawPet($('petSetup'), petOpts(currentMood()));
     StudyPet.drawPet($('petLive'), petOpts(currentMood()));
   }
 
@@ -306,11 +307,11 @@
 
   function currentMood() {
     const s = S.session;
+    if (S.isPetting && (!s || s.mode === 'break')) return 'love';
     if (!s) return 'happy';
     if (s.mode === 'break') return 'love';
     return s.drift ? 'annoyed' : 'focus';
   }
-
   // ---------- Live view ----------
   function renderLive() {
     const s = S.session;
@@ -632,9 +633,21 @@
     if (action === 'finish') { while (s.left > 1) { s.secs[s.total - s.left] = s.drift ? s.drift.kind : 'focus'; if (!s.drift) { s.focusedSec++; s.xpSec += multiplier(); } s.left--; } tick(); }
   }
 
+  function wirePetting(porthole){
+    porthole.addEventListener('pointerenter', () => {
+      S.isPetting = true
+      drawPets()
+    });
+    porthole.addEventListener('pointerleave', () => {
+      S.isPetting = false
+      drawPets()
+    });
+  }
+
   // ---------- Wire up ----------
   function init() {
     buildNixie();
+    document.querySelectorAll('.porthole').forEach(wirePetting);
     $('goal').value = S.settings.goal || '';
     $('petName').value = S.settings.name;
     $('petName').addEventListener('input', (e) => { S.settings.name = e.target.value.slice(0, 10); petChanged(); });
