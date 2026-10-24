@@ -647,8 +647,10 @@
   function wirePetting(porthole) {
     let dist = 0;
     let nextHeartAt = 150;
+    let LeaveTimer;
 
     porthole.addEventListener('pointermove', (e) => {
+      clearTimeout(LeaveTimer);
       dist += Math.abs(e.movementX) + Math.abs(e.movementY);
 
       if (dist >= 150 && !S.isPetting) {
@@ -663,10 +665,12 @@
 
     porthole.addEventListener('pointerleave', () => {
       // ⑤ reset the counter
-      dist = 0;
-      nextHeartAt = 150;
-      S.isPetting = false;
-      drawPets();
+      LeaveTimer = setTimeout(() => {
+        dist = 0;
+        nextHeartAt = 150;
+        S.isPetting = false;
+        drawPets();
+      }, 600);
     });
   }
 
