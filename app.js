@@ -652,10 +652,10 @@ const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rende
     b.hidden = !show;
   }
 
-  function spawnHeart(porthole){
+  function spawnHeart(porthole) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const h = document.createElement('span');
     h.innerHTML = HEART_SVG;
-    h.className = 'pet-heart';
     h.className = 'pet-heart';
     h.style.left = (30 + Math.random() * 40) + '%';
     h.style.top = '30%';
@@ -666,10 +666,10 @@ const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rende
   function wirePetting(porthole) {
     let dist = 0;
     let nextHeartAt = 150;
-    let LeaveTimer;
+    let leaveTimer;
 
     porthole.addEventListener('pointermove', (e) => {
-      clearTimeout(LeaveTimer);
+      clearTimeout(leaveTimer);
       dist += Math.abs(e.movementX) + Math.abs(e.movementY);
 
       if (dist >= 150 && !S.isPetting) {
@@ -677,7 +677,7 @@ const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rende
         drawPets();
       }
 
-      if (S.session.mode === 'focus' && S.isPetting){
+      if (S.session && S.session.mode === 'focus' && S.isPetting) {
         showBubble(porthole, true);
       }
 
@@ -688,8 +688,7 @@ const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rende
     });
 
     porthole.addEventListener('pointerleave', () => {
-      // ⑤ reset the counter
-      LeaveTimer = setTimeout(() => {
+      locationbareaveTimer = setTimeout(() => {
         dist = 0;
         nextHeartAt = 150;
         S.isPetting = false;
