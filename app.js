@@ -34,7 +34,8 @@
     device: { connected: false, port: null, writer: null },
     peekUntil: 0,
     speed: 1,
-    idleDetector: null
+    idleDetector: null,
+    isPetting: false
   };
   const breakRange = (study) => [Math.ceil(study / 5), Math.floor(study / 3)];
   const two = (n) => String(n).padStart(2, '0');
@@ -113,7 +114,10 @@
     return { body: S.settings.body, face: S.settings.face, color: S.settings.color, level: S.progress.level, mood };
   }
   function drawPets() {
-    StudyPet.drawPet($('petSetup'), petOpts('happy'));
+    if (S.lastCard) {
+      StudyPet.drawPet($('petCard'), petOpts(S.isPetting ? 'love' : S.lastCard.mood));
+    }
+    StudyPet.drawPet($('petSetup'), petOpts(currentMood()));
     StudyPet.drawPet($('petLive'), petOpts(currentMood()));
   }
 
@@ -306,11 +310,12 @@
 
   function currentMood() {
     const s = S.session;
+    if (S.isPetting && (!s || s.mode === 'break')) return 'love';
     if (!s) return 'happy';
-    if (s.mode === 'break') return 'love';
+    if (s.mode === 'break') return 'happy';
+    if (S.isPetting) return 'shh';
     return s.drift ? 'annoyed' : 'focus';
   }
-
   // ---------- Live view ----------
   function renderLive() {
     const s = S.session;
@@ -450,8 +455,9 @@
       (c.penalty ? ', and ' + c.penalty + ' XP lost.' : ', ' + c.earned + ' XP' + (c.mult > 1 ? ' with your study circle' : '') + '.') +
       (worst ? ' ' + (worst.kind === 'idle' ? 'Going idle' : worst.label) + ' cost you the most.' : '');
 
-    StudyPet.drawPet($('petCard'), petOpts(c.pct >= 60 ? 'love' : c.pct >= PENALTY_BELOW ? 'happy' : 'annoyed'));
-    $('petVerdict').textContent = c.leveled ? petName() + ' reached Level ' + S.progress.level + '!' + (S.progress.level === 5 ? ' Goggles unlocked.' : S.progress.level === 10 ? ' Bow tie unlocked.' : S.progress.level === 15 ? ' Top hat unlocked.' : '') :
+      c.mood = c.pct >= 60 ? 'love' : c.pct >= PENALTY_BELOW ? 'happy' : 'annoyed';
+      StudyPet.drawPet($('petCard'), petOpts(c.mood));
+      $('petVerdict').textContent = c.leveled ? petName() + ' reached Level ' + S.progress.level + '!' + (S.progress.level === 5 ? ' Goggles unlocked.' : S.progress.level === 10 ? ' Bow tie unlocked.' : S.progress.level === 15 ? ' Top hat unlocked.' : '') :
       c.pct >= 80 ? petName() + ' is most proud.' : c.pct >= PENALTY_BELOW ? petName() + ' is content.' : petName() + ' is disappointed, but you keep your level.';
     $('cardLevel').textContent = 'Lv ' + S.progress.level;
     $('cardXp').textContent = S.progress.xp + ' / ' + XP_PER_LEVEL + ' XP';
@@ -632,9 +638,70 @@
     if (action === 'finish') { while (s.left > 1) { s.secs[s.total - s.left] = s.drift ? s.drift.kind : 'focus'; if (!s.drift) { s.focusedSec++; s.xpSec += multiplier(); } s.left--; } tick(); }
   }
 
+const HEART_SVG = '<svg viewBox="0 0 7 6" width="100%" height="100%" shape-rendering="crispEdges" aria-hidden="true"><g fill="currentColor"><rect x="1" y="0" width="2" height="1"/><rect x="4" y="0" width="2" height="1"/><rect x="0" y="1" width="7" height="2"/><rect x="1" y="3" width="5" height="1"/><rect x="2" y="4" width="3" height="1"/><rect x="3" y="5" width="1" height="1"/></g></svg>';
+
+  function showBubble(porthole, show){
+    let b = porthole.querySelector('.pet-bubble');
+    if (!b){
+      b = document.createElement('span');
+      b.className = 'pet-bubble';
+      b.textContent = "Not now, we're working.";
+
+      porthole.appendChild(b);
+    }
+    b.hidden = !show;
+  }
+
+  function spawnHeart(porthole) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const h = document.createElement('span');
+    h.innerHTML = HEART_SVG;
+    h.className = 'pet-heart';
+    h.style.left = (30 + Math.random() * 40) + '%';
+    h.style.top = '30%';
+    porthole.appendChild(h);
+    h.addEventListener('animationend', () => h.remove());
+  }
+
+  function wirePetting(porthole) {
+    let dist = 0;
+    let nextHeartAt = 150;
+    let leaveTimer;
+
+    porthole.addEventListener('pointermove', (e) => {
+      clearTimeout(leaveTimer);
+      dist += Math.abs(e.movementX) + Math.abs(e.movementY);
+
+      if (dist >= 150 && !S.isPetting) {
+        S.isPetting = true;
+        drawPets();
+      }
+
+      if (S.session && S.session.mode === 'focus' && S.isPetting) {
+        showBubble(porthole, true);
+      }
+
+      if (!(S.session && S.session.mode === 'focus') && (dist >= nextHeartAt)){
+        spawnHeart(porthole);
+        nextHeartAt += 150;
+      }
+    });
+
+    porthole.addEventListener('pointerleave', () => {
+      locationbareaveTimer = setTimeout(() => {
+        dist = 0;
+        nextHeartAt = 150;
+        S.isPetting = false;
+        drawPets();
+        showBubble(porthole, false);
+      }, 600);
+    });
+  }
+
   // ---------- Wire up ----------
   function init() {
     buildNixie();
+    document.querySelectorAll('.porthole').forEach(wirePetting);
     $('goal').value = S.settings.goal || '';
     $('petName').value = S.settings.name;
     $('petName').addEventListener('input', (e) => { S.settings.name = e.target.value.slice(0, 10); petChanged(); });

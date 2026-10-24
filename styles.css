@@ -264,3 +264,33 @@ main { max-width: 1200px; margin: 0 auto; padding: 28px 16px 96px; }
   .print, .print .stamp { animation: none; }
   .rail-fill, .tube .lit { transition: none; }
 }
+
+.pet-heart {
+  position: absolute;
+  width: 21px;
+  height: 18px;
+  pointer-events: none;
+  color: var(--copper-soft);
+  animation: heartFloat 1s ease-out forwards;
+}
+@keyframes heartFloat {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-40px); }
+}
+
+.pet-bubble {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--parch);
+  color: var(--ink);
+  border: 2px solid var(--brass);
+  padding: 8px;
+  font-size: 15px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.porthole { cursor: grab; }
