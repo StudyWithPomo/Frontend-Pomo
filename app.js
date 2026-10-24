@@ -309,7 +309,8 @@
     const s = S.session;
     if (S.isPetting && (!s || s.mode === 'break')) return 'love';
     if (!s) return 'happy';
-    if (s.mode === 'break') return 'love';
+    if (s.mode === 'break') return 'happy';
+    if (S.isPetting) return 'shh';
     return s.drift ? 'annoyed' : 'focus';
   }
   // ---------- Live view ----------
